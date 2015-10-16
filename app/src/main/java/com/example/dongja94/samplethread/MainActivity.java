@@ -1,5 +1,6 @@
 package com.example.dongja94.samplethread;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,6 +57,60 @@ public class MainActivity extends AppCompatActivity {
                 startRunnable();
             }
         });
+
+        btn = (Button)findViewById(R.id.btn_async);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                new MyTask().execute();
+                MyAsyncTask task = new MyAsyncTask();
+                task.setOnDownloadListener(new MyAsyncTask.OnDownloadListener() {
+                    @Override
+                    public void onProgressUpdate(int progress) {
+                        messageView.setText("progress : " + progress);
+                        progressDownload.setProgress(progress);
+                    }
+
+                    @Override
+                    public void onProgessDone(boolean success) {
+                        messageView.setText("progress done");
+                    }
+                });
+
+                task.execute();
+            }
+        });
+    }
+
+    class MyTask extends AsyncTask<String, Integer, Boolean> {
+        @Override
+        protected Boolean doInBackground(String... params) {
+            int count = 0;
+            while(count <= 100) {
+                publishProgress(count);
+                count+= 5;
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return true;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            int progress = values[0];
+            messageView.setText("progress : " + progress);
+            progressDownload.setProgress(progress);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            messageView.setText("progress done");
+        }
     }
 
     public static final int MESSAGE_PROGRESS = 1;
