@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -116,6 +117,11 @@ public class MainActivity extends AppCompatActivity {
     public static final int MESSAGE_PROGRESS = 1;
     public static final int MESSAGE_DONE = 2;
 
+    public static final int MESSAGE_BACK_TIMEOUT = 3;
+    public static final int TIME_BACK_TIMEOUT = 2000;
+
+    private boolean isBackPressed = false;
+
     Handler mHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg) {
@@ -129,9 +135,24 @@ public class MainActivity extends AppCompatActivity {
                 case MESSAGE_DONE :
                     messageView.setText("progress done");
                     break;
+                case MESSAGE_BACK_TIMEOUT :
+                    isBackPressed = false;
+                    break;
             }
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        if (isBackPressed) {
+            mHandler.removeMessages(MESSAGE_BACK_TIMEOUT);
+            super.onBackPressed();
+        } else {
+            isBackPressed = true;
+            Toast.makeText(this,"back key press", Toast.LENGTH_SHORT).show();
+            mHandler.sendEmptyMessageDelayed(MESSAGE_BACK_TIMEOUT, TIME_BACK_TIMEOUT);
+        }
+    }
 
     private void startDownload() {
         new Thread(new Runnable() {
